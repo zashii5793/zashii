@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>test</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>割り勘計算</h1>
+    <p>代金: <input id="amount" type="number" placeholder="支払い"></p>
+    <p>人数: <input id="num" type="number" placeholder="人数"></p>
+    <p>丸め: <select id="roundUnit"><option value="100">100</option><option value="500">500</option><option value="1000">1000</option></select></p>
+    <p>端数処理: <select id="roundType"><option value="0">先輩ごちそうさま！(少なめに集める)</option><option value="1">幹事おつかれさま！(多めに集める)</option></select></p>
+    <p><input type="button" value="計算する" onClick="getResult()"></p>
+    <p id="result"></p>
+
+<script>
+    /*** 固定値 ***/
+    var ROUND_TYPE_DOWN = "0"; // 丸め処理の判定で切り捨てを示す値
+
+    function getResult() {
+        /*** 値の取得 ***/
+        var amount    = document.getElementById("amount").value; // 支払額
+        var num       = document.getElementById("num").value; // 人数
+        var roundUnit = document.getElementById("roundUnit").value; // 丸め処理の単位
+        var roundType = document.getElementById("roundType").value; // 丸め処理
+
+        /*** 値のチェック ***/
+        if (!amount || !num) {
+        	alert("数値を入力して下さい");
+        	return;
+        }
+
+        /*** 計算処理 ***/
+        var payment; // 一人あたりの支払額
+        var result;   // 最後に出力する結果の文字列
+
+        if (roundType === ROUND_TYPE_DOWN) {
+            // 端数を切り捨てて少なめに集める
+            payment = Math.floor(amount / roundUnit / num) * roundUnit;
+            var shortage = amount - (payment * num);
+            result = "一人あたりの支払額: " + payment + " / 不足金額: " + shortage;
+        } else {
+            // 端数を切りあげて多めに集める
+            payment = Math.ceil(amount / roundUnit / num) * roundUnit;
+            var remainder = (payment * num) - amount;
+            result = "一人あたりの支払額: " + payment + " / 余り金額: " + remainder;
+        }
+
+        /*** 結果表示 ***/
+        document.getElementById("result").innerHTML = result;
+    }
+</script>
+</body> 
+</html>
