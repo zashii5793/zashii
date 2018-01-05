@@ -10,6 +10,7 @@
 <script src='../fullcalendar.min.js'></script>
 <script>
 //基本的な使い方を学ぶことができます。
+//右上に切替ボタンがあります。月別、週別、日別と表示が切り替わります。
   $(document).ready(function() {
 
     $('#calendar').fullCalendar({
@@ -22,10 +23,21 @@
       navLinks: true, // can click day/week names to navigate views
       editable: true,
       eventLimit: true, // allow "more" link when too many events
+      // ビュー表示イベント
+      viewDisplay: function(view) {
+            //alert('ビュー表示イベント ' + view.title);
+      },
+      // ウィンドウリサイズイベント
+      windowResize: function(view) {
+            //alert('ウィンドウリサイズイベント');
+      },
+      // 日付クリックイベント
+      dayClick: function () {
+          //alert('日付クリックイベント');
+      },       
       events: [
       ]
     });
-
   });
 
 </script>
@@ -42,7 +54,9 @@
     max-width: 900px;
     margin: 0 auto;
   }
-
+  .fc-sun, .fc-sat {
+      color: #FF0000;
+  }
 </style>
 </head>
 <body>
