@@ -8,8 +8,60 @@
 <script src='../lib/jquery.min.js'></script>
 <script src='../fullcalendar.min.js'></script>
 <script>
-//特定イベント設置場所を限定化する方法、全イベントの配置不可設定をする方法を学べます。
+    console.log('test');
   $(document).ready(function() {
+    console.log('test');
+
+      var callbackUrl = "http://localhost:3000/oauth_callback"; // your endpoint
+
+      // initialize OAuth
+      var Evernote = require('evernote');
+      var client = new Evernote.Client({
+        consumerKey: 'zashii',
+        consumerSecret: '97b1e870d4f2cbc2',
+        sandbox: true, // change to false when you are ready to switch to production
+        china: false, // change to true if you wish to connect to YXBJ - most of you won't
+      });
+
+      client.getRequestToken(callbackUrl, function(error, oauthToken, oauthTokenSecret) {
+      if (error) {
+        // do your error handling here
+      }
+        // store your token here somewhere - for this example we use req.session
+        req.session.oauthToken = oauthToken;
+        req.session.oauthTokenSecret = oauthTokenSecret;
+        res.redirect(client.getAuthorizeUrl(oauthToken)); // send the user to Evernote
+      });
+      //console.log(client.getAccessToken());
+
+    // at callbackUrl - "http://localhost:3000/oauth_callback" in our example. User sent here after Evernote auth
+    var client = new Evernote.Client({
+      consumerKey: 'zashii',
+      consumerSecret: '97b1e870d4f2cbc2',
+      sandbox: true,
+      china: false,
+    });
+    
+    client.getAccessToken(req.session.oauthToken,
+      req.session.oauthTokenSecret,
+      req.query.oauth_verifier,
+    function(error, oauthToken, oauthTokenSecret, results) {
+      if (error) {
+        // do your error handling
+      } else {
+        // oauthAccessToken is the token you need;
+        var authenticatedClient = new Evernote.Client({
+          token: oauthToken,
+          sandbox: true,
+          china: false,
+        });
+        
+        var noteStore = authenticatedClient.getNoteStore();
+        noteStore.listNotebooks().then(function(notebooks) {
+          console.log(notebooks); // the user's notebooks!
+        });
+      }
+    });
 
     $('#calendar').fullCalendar({
       header: {
@@ -22,6 +74,56 @@
       businessHours: true, // display business hours
       editable: true,
       events: [
+        {
+          title: 'Business Lunch',
+          start: '2017-12-03T13:00:00',
+          constraint: 'businessHours'
+        },
+        {
+          title: 'Meeting',
+          start: '2017-12-13T11:00:00',
+          constraint: 'availableForMeeting', // defined below
+          color: '#257e4a'
+        },
+        {
+          title: 'Conference',
+          start: '2017-12-18',
+          end: '2017-12-20'
+        },
+        {
+          title: 'Party',
+          start: '2017-12-29T20:00:00'
+        },
+
+        // areas where "Meeting" must be dropped
+        {
+          id: 'availableForMeeting',
+          start: '2017-12-11T10:00:00',
+          end: '2017-12-11T16:00:00',
+          rendering: 'background'
+        },
+        {
+          id: 'availableForMeeting',
+          start: '2017-12-13T10:00:00',
+          end: '2017-12-13T16:00:00',
+          rendering: 'background'
+        },
+
+        // red areas where no events can be dropped
+        {
+          start: '2017-12-24',
+          end: '2017-12-28',
+          overlap: false,
+          rendering: 'background',
+          color: '#ff9f89'
+        },
+        {
+          start: '2017-12-06',
+          end: '2017-12-08',
+          overlap: false,
+          rendering: 'background',
+          color: '#ff9f89'
+        }
       ]
     });
 
